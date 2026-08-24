@@ -1526,39 +1526,74 @@ footer {
   }
 }
 
+.mobile-toggle,
+.hamburger {
+  display: none;
+}
+
 /* Responsive Overrides */
 @media (max-width: 960px) {
   nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
+    position: absolute;
+    top: 100%;
+    right: 14px;
     background: rgba(241, 226, 195, 0.95);
     backdrop-filter: blur(14px);
-    border-top: 1px solid var(--line);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 16px;
     display: flex;
-    justify-content: space-around;
-    align-items: center;
-    padding: 0 10px;
-    z-index: 100;
+    flex-direction: column;
+    gap: 16px;
+    box-shadow: var(--shadow);
+    transform: translateY(-10px);
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
   }
 
   :root[data-theme=night] nav {
     background: rgba(5, 18, 33, 0.95);
   }
 
+  nav.open {
+    transform: translateY(10px);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
   nav a {
-    flex-direction: column;
-    font-size: 8px;
-    gap: 4px;
+    font-size: 11px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.1);
   }
 
   nav a svg {
-    width: 28px !important;
-    height: 28px !important;
-    min-width: 28px;
-    min-height: 28px;
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px;
+    min-height: 24px;
+  }
+
+  .desktop-toggle {
+    display: none;
+  }
+
+  .mobile-toggle {
+    width: 100%;
+    margin-top: 8px;
+    padding: 12px;
+    font-size: 11px;
+  }
+
+  .hamburger {
+    background: transparent;
+    border: none;
+    color: var(--ink);
+    font-size: 24px;
+    cursor: pointer;
+    padding: 4px;
   }
 
   .signal-bar {

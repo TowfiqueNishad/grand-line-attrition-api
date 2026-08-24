@@ -152,6 +152,8 @@ function App() {
   const [activeGroup, setActiveGroup] = useState<string>('A')
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
 
+  const [menuOpen, setMenuOpen] = useState(false)
+
   const predictionRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -193,7 +195,6 @@ function App() {
     setResult(null)
     setLoading(true)
 
-    // Animated Loading Sequence (synchronized with fake delay to match One Piece drama under 2s)
     for (let index = 1; index <= 3; index += 1) {
       setStage(index)
       await new Promise((resolve) => setTimeout(resolve, 500))
@@ -213,7 +214,6 @@ function App() {
     }
   }
 
-  // Calculate completed sections metrics for Voyage Progress bar
   const checkFields = (fieldsList: string[]) => fieldsList.every(f => employee[f] !== undefined && employee[f] !== '')
   const stepA = checkFields(['Age', 'Gender', 'MaritalStatus', 'Education'])
   const stepB = checkFields(['Department', 'EducationField', 'JobRole', 'JobLevel', 'MonthlyIncome', 'YearsAtCompany'])
@@ -225,7 +225,6 @@ function App() {
 
   return (
     <div className="app-shell" style={{ transform: `translate3d(${mousePos.x * 0.15}px, ${mousePos.y * 0.15}px, 0)` }}>
-      {/* Immersive Animated Background Canvas */}
       <div className="energy-field">
         <div className="noise" />
         <div className="light-field light-one" />
@@ -235,7 +234,6 @@ function App() {
         <div className="ribbon ribbon-three" />
         <div className="horizon" />
         
-        {/* Layered Twilight Star Field */}
         <div className="star-layer star-back" />
         <div className="star-layer star-mid" />
         <div className="star-layer star-front" />
@@ -246,16 +244,23 @@ function App() {
           <span className="brand-orbit"><WheelIcon /></span>
           <span><b>GRAND LINE</b><small>EMPLOYEE ATTRITION INTELLIGENCE</small></span>
         </a>
-        <nav>
-          <a href="#home"><CompassIcon /> HOME</a>
-          <a href="#employee"><SwordsIcon /> PREDICT</a>
-          <a href="#analytics"><SkullIcon /> ANALYTICS</a>
-          <a href="#insights"><AnchorIcon /> INSIGHTS</a>
-          <a href="#system"><FlagIcon /> SYSTEM</a>
+        <nav className={menuOpen ? 'open' : ''}>
+          <a href="#home" onClick={() => setMenuOpen(false)}><CompassIcon /> HOME</a>
+          <a href="#employee" onClick={() => setMenuOpen(false)}><SwordsIcon /> PREDICT</a>
+          <a href="#analytics" onClick={() => setMenuOpen(false)}><SkullIcon /> ANALYTICS</a>
+          <a href="#insights" onClick={() => setMenuOpen(false)}><AnchorIcon /> INSIGHTS</a>
+          <a href="#system" onClick={() => setMenuOpen(false)}><FlagIcon /> SYSTEM</a>
+          
+          <button className="theme-toggle mobile-toggle" onClick={() => { setTheme(theme === 'day' ? 'night' : 'day'); setMenuOpen(false); }}>
+            {theme === 'day' ? '☀ DAY MODE' : '☾ NIGHT MODE'}
+          </button>
         </nav>
         <div className="top-actions">
-          <button className="theme-toggle" onClick={() => setTheme(theme === 'day' ? 'night' : 'day')} aria-label="Toggle day and night theme">
+          <button className="theme-toggle desktop-toggle" onClick={() => setTheme(theme === 'day' ? 'night' : 'day')} aria-label="Toggle day and night theme">
             {theme === 'day' ? '☀' : '☾'}
+          </button>
+          <button className="hamburger" onClick={() => setMenuOpen(!menuOpen)} aria-label="Toggle menu">
+            {menuOpen ? '✕' : '☰'}
           </button>
         </div>
       </header>
