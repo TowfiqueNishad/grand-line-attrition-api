@@ -43,6 +43,7 @@
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
 }
 
 body {
@@ -52,6 +53,7 @@ body {
   background: var(--paper);
   color: var(--ink);
   -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
 }
 
 button,
@@ -1620,6 +1622,7 @@ footer {
   .system-section,
   footer {
     width: calc(100% - 30px);
+    margin: 0 auto;
   }
 
   .voyage-node::after {
