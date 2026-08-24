@@ -1,0 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@500;700;900&family=Inter:wght@400;500;600;700&family=Rye&display=swap');
+
+:root {
+  font-family: 'Inter', sans-serif;
+  color: #112638;
+  background: #f1e2c3;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; }
+button, input, select { font: inherit; }
