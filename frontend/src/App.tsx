@@ -94,7 +94,7 @@ function Field({ label, name, value, update, min, max, choices, onFocus }: { lab
           <CustomSelectArrow />
         </span>
       ) : (
-        <input type="number" value={value} min={min} max={max} onChange={(event) => update(name, Number(event.target.value))} onFocus={onFocus} />
+        <input type="number" value={value} min={min} max={max} onChange={(event) => update(name, event.target.value === '' ? '' : Number(event.target.value))} onFocus={onFocus} />
       )}
     </label>
   )

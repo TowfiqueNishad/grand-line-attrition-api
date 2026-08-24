@@ -3,7 +3,8 @@
 import os
 import joblib
 import pandas as pd
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, RequestValidationError
+from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -42,6 +43,31 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request, exc):
+    errors = exc.errors()
+    missing_fields = []
+    invalid_fields = []
+    for err in errors:
+        loc = err.get("loc", [])
+        field_name = loc[-1] if loc else "Field"
+        if err.get("type") == "missing":
+            missing_fields.append(str(field_name))
+        else:
+            invalid_fields.append(str(field_name))
+    
+    msgs = []
+    if missing_fields:
+        msgs.append(f"Missing required fields: {', '.join(missing_fields)}")
+    if invalid_fields:
+        msgs.append(f"Invalid or empty values in fields: {', '.join(invalid_fields)}")
+        
+    return JSONResponse(
+        status_code=422,
+        content={"detail": "Please review your input: " + ". ".join(msgs)}
+    )
+
 
 # ---------------------------------------------------------------------------
 # Lazy model loading — loaded on first request, not at import time.
