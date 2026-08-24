@@ -1581,6 +1581,7 @@ footer {
   }
 
   .mobile-toggle {
+    display: block;
     width: 100%;
     margin-top: 8px;
     padding: 12px;
@@ -1588,6 +1589,9 @@ footer {
   }
 
   .hamburger {
+    display: flex;
+    align-items: center;
+    justify-content: center;
     background: transparent;
     border: none;
     color: var(--ink);
