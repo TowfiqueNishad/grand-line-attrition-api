@@ -3,7 +3,8 @@
 import os
 import joblib
 import pandas as pd
-from fastapi import FastAPI, HTTPException, RequestValidationError
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -45,7 +46,7 @@ app.add_middleware(
 )
 
 @app.exception_handler(RequestValidationError)
-async def validation_exception_handler(request, exc):
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
     errors = exc.errors()
     missing_fields = []
     invalid_fields = []
