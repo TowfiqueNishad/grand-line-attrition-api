@@ -3,6 +3,7 @@
 import os
 import joblib
 import pandas as pd
+from typing import Any
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -17,7 +18,7 @@ from feature_engineering import add_hr_features
 app = FastAPI(
     title="HR Attrition Predictor",
     description=(
-        "Predicts employee attrition probability using a trained XGBoost model. "
+        "Predicts employee attrition probability using a trained Logistic Regression pipeline. "
         "Submit raw IBM HR dataset fields (pre-feature-engineering) and receive "
         "a probability, binary prediction, and risk tier."
     ),
@@ -75,13 +76,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # This lets the server start even before the .joblib files exist.
 # ---------------------------------------------------------------------------
 _model = None
-_threshold = None
+_threshold: float | None = None
 
 MODEL_PATH     = os.getenv("MODEL_PATH",     "attrition_model.joblib")
 THRESHOLD_PATH = os.getenv("THRESHOLD_PATH", "threshold.joblib")
 
 
-def get_model():
+def get_model() -> tuple[Any, float]:
     global _model, _threshold
     if _model is None:
         if not os.path.exists(MODEL_PATH):
@@ -101,7 +102,8 @@ def get_model():
                 detail=f"Threshold file not found: '{THRESHOLD_PATH}'.",
             )
         _model     = joblib.load(MODEL_PATH)
-        _threshold = joblib.load(THRESHOLD_PATH)
+        _threshold = float(joblib.load(THRESHOLD_PATH))
+    assert _threshold is not None
     return _model, _threshold
 
 
@@ -209,6 +211,44 @@ def health_check():
         "model_ready": model_ready,
         "model_path": MODEL_PATH,
         "threshold_path": THRESHOLD_PATH,
+    }
+
+
+@app.get("/model-info", tags=["Health"])
+def model_info():
+    """Return metadata about the loaded model (name, feature count, threshold)."""
+    model, threshold = get_model()
+
+    # Determine the model name from the pipeline's final estimator
+    if hasattr(model, "steps"):
+        final_step_name, final_estimator = model.steps[-1]
+        model_name = type(final_estimator).__name__
+    else:
+        model_name = type(model).__name__
+
+    # Build a sample to count engineered features
+    _example: dict = {
+        "Age": 35, "BusinessTravel": "Travel_Rarely", "DailyRate": 800,
+        "Department": "Research & Development", "DistanceFromHome": 5,
+        "Education": 3, "EducationField": "Life Sciences",
+        "EnvironmentSatisfaction": 3, "Gender": "Male", "HourlyRate": 65,
+        "JobInvolvement": 3, "JobLevel": 2, "JobRole": "Research Scientist",
+        "JobSatisfaction": 3, "MaritalStatus": "Single", "MonthlyIncome": 5000,
+        "MonthlyRate": 14000, "NumCompaniesWorked": 2, "OverTime": "No",
+        "PercentSalaryHike": 13, "PerformanceRating": 3,
+        "RelationshipSatisfaction": 3, "StockOptionLevel": 1,
+        "TotalWorkingYears": 10, "TrainingTimesLastYear": 3,
+        "WorkLifeBalance": 3, "YearsAtCompany": 5, "YearsInCurrentRole": 3,
+        "YearsSinceLastPromotion": 1, "YearsWithCurrManager": 3,
+    }
+    sample = pd.DataFrame([_example])
+    engineered = add_hr_features(sample)
+    feature_count = engineered.shape[1]
+
+    return {
+        "model_name": model_name,
+        "feature_count": feature_count,
+        "threshold": round(float(threshold), 4),
     }
 
 

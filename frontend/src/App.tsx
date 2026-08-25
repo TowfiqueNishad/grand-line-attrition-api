@@ -5,6 +5,7 @@ import './App.css'
 
 type Employee = Record<string, string | number>
 type Prediction = { attrition_probability: number; prediction: 'Yes' | 'No'; risk_level: 'High' | 'Medium' | 'Low'; threshold_used: number }
+type ModelInfo = { model_name: string; feature_count: number; threshold: number }
 
 const initialEmployee: Employee = { Age: 35, BusinessTravel: 'Travel_Rarely', DailyRate: 800, Department: 'Research & Development', DistanceFromHome: 5, Education: 3, EducationField: 'Life Sciences', EnvironmentSatisfaction: 3, Gender: 'Male', HourlyRate: 65, JobInvolvement: 3, JobLevel: 2, JobRole: 'Research Scientist', JobSatisfaction: 3, MaritalStatus: 'Single', MonthlyIncome: 5000, MonthlyRate: 14000, NumCompaniesWorked: 2, OverTime: 'No', PercentSalaryHike: 13, PerformanceRating: 3, RelationshipSatisfaction: 3, StockOptionLevel: 1, TotalWorkingYears: 10, TrainingTimesLastYear: 3, WorkLifeBalance: 3, YearsAtCompany: 5, YearsInCurrentRole: 3, YearsSinceLastPromotion: 1, YearsWithCurrManager: 3 }
 const options: Record<string, string[]> = { BusinessTravel: ['Travel_Rarely', 'Travel_Frequently', 'Non-Travel'], Department: ['Sales', 'Research & Development', 'Human Resources'], EducationField: ['Life Sciences', 'Medical', 'Marketing', 'Technical Degree', 'Other', 'Human Resources'], Gender: ['Male', 'Female'], JobRole: ['Sales Executive', 'Research Scientist', 'Laboratory Technician', 'Manufacturing Director', 'Healthcare Representative', 'Manager', 'Sales Representative', 'Research Director', 'Human Resources'], MaritalStatus: ['Single', 'Married', 'Divorced'], OverTime: ['Yes', 'No'] }
@@ -12,6 +13,7 @@ const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 async function health() { const response = await fetch(`${API_BASE}/`); if (!response.ok) throw new Error(`Health check failed (${response.status})`); return response.json() as Promise<{ model_ready: boolean }> }
 async function predict(employee: Employee) { const response = await fetch(`${API_BASE}/predict`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(employee) }); const body = await response.json(); if (!response.ok) throw new Error(body.detail || `Prediction failed (${response.status})`); return body as Prediction }
+async function fetchModelInfo() { const response = await fetch(`${API_BASE}/model-info`); if (!response.ok) return null; return response.json() as Promise<ModelInfo> }
 
 // Custom Pirate Engraving Style SVGs with specific hover interactive motions
 const CompassIcon = () => (
@@ -121,18 +123,20 @@ function FieldGroup({ index, title, copy, icon: Icon, active, children }: { inde
 function CountUp({ value }: { value: number }) {
   const [count, setCount] = useState(0)
   useEffect(() => {
-    let start = 0
     const end = value
-    if (start === end) return
+    if (end <= 0) { setCount(0); return }
     const totalDuration = 1000
-    const incrementTime = Math.max(Math.floor(totalDuration / end), 15)
+    const steps = Math.max(Math.ceil(end), 1)
+    const incrementTime = Math.max(Math.floor(totalDuration / steps), 15)
+    const increment = end / steps
+    let step = 0
     const timer = setInterval(() => {
-      start += 1
-      if (start >= end) {
+      step += 1
+      if (step >= steps) {
         setCount(end)
         clearInterval(timer)
       } else {
-        setCount(start)
+        setCount(increment * step)
       }
     }, incrementTime)
     return () => clearInterval(timer)
@@ -151,6 +155,7 @@ function App() {
   const [scrolled, setScrolled] = useState(false)
   const [activeGroup, setActiveGroup] = useState<string>('A')
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 })
+  const [modelInfo, setModelInfo] = useState<ModelInfo | null>(null)
 
   const [menuOpen, setMenuOpen] = useState(false)
 
@@ -163,6 +168,7 @@ function App() {
 
   useEffect(() => {
     health().then((data) => setOnline(data.model_ready)).catch(() => setOnline(false))
+    fetchModelInfo().then((info) => { if (info) setModelInfo(info) }).catch(() => {})
     
     const onScroll = () => setScrolled(window.scrollY > 24)
     const onMouseMove = (e: MouseEvent) => {
@@ -287,9 +293,9 @@ function App() {
 
         {/* Technical Signal Bar with nautical styling */}
         <section className="signal-bar">
-          <span><b>MODEL</b> LOGISTIC REGRESSION</span>
-          <span><b>FEATURES</b> 47 ENGINEERED</span>
-          <span><b>THRESHOLD</b> 0.61</span>
+          <span><b>MODEL</b> {modelInfo?.model_name?.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase() || 'LOADING...'}</span>
+          <span><b>FEATURES</b> {modelInfo?.feature_count ?? '—'} ENGINEERED</span>
+          <span><b>THRESHOLD</b> {modelInfo?.threshold?.toFixed(2) ?? '—'}</span>
           <span className="signal-message">🧭 Log Pose is calibrated. Ready to sail.</span>
         </section>
 
@@ -471,7 +477,7 @@ function App() {
             <article>
               <AnchorIcon />
               <small>DECISION THRESHOLD</small>
-              <strong>0.61</strong>
+              <strong>{modelInfo?.threshold?.toFixed(2) ?? '0.61'}</strong>
               <span>Validation Selected</span>
             </article>
             <article>

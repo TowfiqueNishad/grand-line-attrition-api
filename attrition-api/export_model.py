@@ -76,4 +76,4 @@ if __name__ == "__main__":
     df = add_hr_features(df)
     prob = model.predict_proba(df)[0, 1]
     pred = int(prob >= threshold)
-    print(f"Smoke test → probability={prob:.4f}, prediction={'Yes' if pred else 'No'}, threshold={threshold}")
+    print(f"Smoke test -> probability={prob:.4f}, prediction={'Yes' if pred else 'No'}, threshold={threshold}")

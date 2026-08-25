@@ -1,0 +1,16 @@
+{
+  "venvPath": "d:/APIs/First APi/attrition-api",
+  "venv": "venv",
+  "pythonVersion": "3.12",
+  "pythonPlatform": "Windows",
+  "include": [
+    "attrition-api"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__",
+    "**/venv",
+    "**/dist"
+  ],
+  "typeCheckingMode": "basic"
+}
