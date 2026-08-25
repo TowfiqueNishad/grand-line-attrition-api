@@ -423,7 +423,7 @@ function App() {
             <h1>GRAND<br /><em>LINE</em></h1>
             <p className="hero-title">EMPLOYEE ATTRITION INTELLIGENCE</p>
             <p className="hero-copy">
-              Stop workforce mutiny before it sets sail. Grand Line leverages an 11-model machine learning pipeline to forecast employee attrition risks in real time, delivering calibrated insights to keep your crew loyal and united.
+              <b>Stop workforce mutiny before it sets sail.</b> Grand Line leverages a <b>calibrated 11-model machine learning pipeline</b> to forecast <b>employee departure risks in real time</b>, giving leaders the power to <b>keep high-impact crew united and loyal</b>.
             </p>
             <div className="hero-actions">
               <a className="primary-cta" href="#employee">⚔ START PREDICTION</a>
