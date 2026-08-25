@@ -457,6 +457,37 @@ nav a:hover::after {
   max-width: 800px;
 }
 
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 16px;
+  background: rgba(223, 163, 43, 0.12);
+  border: 1px solid rgba(223, 163, 43, 0.35);
+  border-radius: 20px;
+  margin-bottom: 22px;
+  font-family: var(--font-heading);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  color: var(--gold);
+  backdrop-filter: blur(8px);
+}
+
+.badge-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #25a86a;
+  box-shadow: 0 0 10px #25a86a;
+  animation: pulse-dot 2s infinite ease-in-out;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.3); opacity: 0.6; }
+}
+
 .eyebrow {
   color: var(--gold);
   font-family: var(--font-heading);

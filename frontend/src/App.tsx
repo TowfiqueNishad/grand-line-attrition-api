@@ -415,10 +415,16 @@ function App() {
         {/* Cinematic Grand Line Hero */}
         <section className="hero" id="home" style={{ transform: `translate3d(${mousePos.x * -0.2}px, ${mousePos.y * -0.2}px, 0)` }}>
           <div className="hero-center">
+            <div className="hero-badge">
+              <span className="badge-dot" />
+              <span>AI-POWERED WORKFORCE INTELLIGENCE & ATTRITION FORECASTING API</span>
+            </div>
             <p className="eyebrow hero-label"><span /> THE GRAND LINE <span /></p>
             <h1>GRAND<br /><em>LINE</em></h1>
             <p className="hero-title">EMPLOYEE ATTRITION INTELLIGENCE</p>
-            <p className="hero-copy">Navigate workforce data. Predict attrition. Discover risk. Keep your pirate crew united under one flag.</p>
+            <p className="hero-copy">
+              Stop workforce mutiny before it sets sail. Grand Line leverages an 11-model machine learning pipeline to forecast employee attrition risks in real time, delivering calibrated insights to keep your crew loyal and united.
+            </p>
             <div className="hero-actions">
               <a className="primary-cta" href="#employee">⚔ START PREDICTION</a>
               <a className="secondary-cta" href="#analytics">⚓ EXPLORE ANALYTICS</a>
@@ -477,7 +483,7 @@ function App() {
             </FieldGroup>
 
             <FieldGroup index="B" title="PROFESSIONAL DETAILS" copy="Role assignments, rank and service tenure" icon={SwordsIcon} active={activeGroup === 'B'}>
-              <>{select('Department', 'Department', 'B')}{select('EducationField', 'Education Field', 'B')}{select('JobRole', 'Job Role', 'B')}{select('JobLevel', 'Job Level', 'B')}{number('MonthlyIncome', 'Monthly Income (Gold Coins)', 0, undefined, 'B')}{number('YearsAtCompany', 'Years on this Voyage', 0, undefined, 'B')}{number('YearsInCurrentRole', 'Years in Current Duty', 0, undefined, 'B')}{number('YearsSinceLastPromotion', 'Years Since Last Promotion', 0, undefined, 'B')}{number('YearsWithCurrManager', 'Years Under Current Captain', 0, undefined, 'B')}{number('TotalWorkingYears', 'Total Pirate Career Years', 0, undefined, 'B')}</>
+              <>{select('Department', 'Department', 'B')}{select('EducationField', 'Education Field', 'B')}{select('JobRole', 'Job Role', 'B')}{select('JobLevel', 'Job Level', 'B')}{number('MonthlyIncome', 'Monthly Income (USD)', 0, undefined, 'B')}{number('YearsAtCompany', 'Years on this Voyage', 0, undefined, 'B')}{number('YearsInCurrentRole', 'Years in Current Duty', 0, undefined, 'B')}{number('YearsSinceLastPromotion', 'Years Since Last Promotion', 0, undefined, 'B')}{number('YearsWithCurrManager', 'Years Under Current Captain', 0, undefined, 'B')}{number('TotalWorkingYears', 'Total Pirate Career Years', 0, undefined, 'B')}</>
             </FieldGroup>
 
             <FieldGroup index="C" title="WORK ENVIRONMENT" copy="Wellbeing, morale, and voyage stability" icon={AnchorIcon} active={activeGroup === 'C'}>
