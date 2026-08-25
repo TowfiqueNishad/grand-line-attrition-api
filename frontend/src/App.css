@@ -738,6 +738,8 @@ h1 em {
 
 /* 6. Form Sections */
 .profile-section {
+  width: min(1140px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 100px 0 80px;
 }
 
@@ -943,6 +945,8 @@ h1 em {
 
 /* 7. Prediction Loading Sequence */
 .prediction-section {
+  width: min(1140px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 40px 0 100px;
 }
 
@@ -1104,7 +1108,7 @@ h1 em {
   margin: 12px 0;
   font-family: var(--font-heading);
   font-weight: 900;
-  font-size: 42px;
+  font-size: 48px;
   line-height: 1;
 }
 
@@ -1129,7 +1133,7 @@ h1 em {
   background: #ecdcb9;
   border: 8px double #4a3319;
   padding: 24px 20px;
-  width: 280px;
+  width: 300px;
   box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
   position: relative;
   transform: rotate(-1.5deg);
@@ -1201,9 +1205,10 @@ h1 em {
 
 .wanted-probability {
   font-family: var(--font-wanted);
-  font-size: 40px;
+  font-size: 54px;
   color: #1a0f05;
   margin: 6px 0;
+  line-height: 1;
 }
 
 .wanted-attr-status {
@@ -1220,8 +1225,8 @@ h1 em {
 }
 
 .gauge-inner {
-  width: 190px;
-  height: 190px;
+  width: 220px;
+  height: 220px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1240,7 +1245,7 @@ h1 em {
 .gauge-inner::before {
   content: '';
   position: absolute;
-  inset: 12px;
+  inset: 14px;
   border-radius: 50%;
   background: var(--solid);
 }
@@ -1253,17 +1258,17 @@ h1 em {
 
 .gauge-inner strong {
   font-family: var(--font-wanted);
-  font-size: 44px;
+  font-size: 52px;
   color: var(--ink);
 }
 
 .gauge-inner strong small {
-  font-size: 20px;
+  font-size: 24px;
 }
 
 .gauge-inner span {
   color: var(--muted);
-  font-size: 9px;
+  font-size: 10px;
   font-family: var(--font-heading);
   font-weight: 800;
   letter-spacing: 1px;
@@ -1295,6 +1300,8 @@ h1 em {
 
 /* 9. Analytics */
 .analytics-section {
+  width: min(1140px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 60px 0 100px;
   border-top: 1px solid var(--line);
 }
@@ -1351,6 +1358,8 @@ h1 em {
 
 /* 10. Insights Section */
 .insights-section {
+  width: min(1140px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 80px 0;
   display: flex;
   justify-content: space-between;
@@ -1391,6 +1400,8 @@ h1 em {
 
 /* 11. System Status */
 .system-section {
+  width: min(1140px, calc(100% - 48px));
+  margin: 0 auto;
   padding: 80px 0 100px;
   border-top: 1px solid var(--line);
 }

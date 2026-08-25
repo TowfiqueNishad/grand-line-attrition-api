@@ -6,9 +6,106 @@ import './App.css'
 type Employee = Record<string, string | number>
 type Prediction = { attrition_probability: number; prediction: 'Yes' | 'No'; risk_level: 'High' | 'Medium' | 'Low'; threshold_used: number }
 type ModelInfo = { model_name: string; feature_count: number; threshold: number }
+type OptionItem = string | { label: string; value: string | number }
 
-const initialEmployee: Employee = { Age: 35, BusinessTravel: 'Travel_Rarely', DailyRate: 800, Department: 'Research & Development', DistanceFromHome: 5, Education: 3, EducationField: 'Life Sciences', EnvironmentSatisfaction: 3, Gender: 'Male', HourlyRate: 65, JobInvolvement: 3, JobLevel: 2, JobRole: 'Research Scientist', JobSatisfaction: 3, MaritalStatus: 'Single', MonthlyIncome: 5000, MonthlyRate: 14000, NumCompaniesWorked: 2, OverTime: 'No', PercentSalaryHike: 13, PerformanceRating: 3, RelationshipSatisfaction: 3, StockOptionLevel: 1, TotalWorkingYears: 10, TrainingTimesLastYear: 3, WorkLifeBalance: 3, YearsAtCompany: 5, YearsInCurrentRole: 3, YearsSinceLastPromotion: 1, YearsWithCurrManager: 3 }
-const options: Record<string, string[]> = { BusinessTravel: ['Travel_Rarely', 'Travel_Frequently', 'Non-Travel'], Department: ['Sales', 'Research & Development', 'Human Resources'], EducationField: ['Life Sciences', 'Medical', 'Marketing', 'Technical Degree', 'Other', 'Human Resources'], Gender: ['Male', 'Female'], JobRole: ['Sales Executive', 'Research Scientist', 'Laboratory Technician', 'Manufacturing Director', 'Healthcare Representative', 'Manager', 'Sales Representative', 'Research Director', 'Human Resources'], MaritalStatus: ['Single', 'Married', 'Divorced'], OverTime: ['Yes', 'No'] }
+const initialEmployee: Employee = {
+  Age: 35,
+  BusinessTravel: 'Travel_Rarely',
+  DailyRate: 800,
+  Department: 'Research & Development',
+  DistanceFromHome: 5,
+  Education: 3,
+  EducationField: 'Life Sciences',
+  EnvironmentSatisfaction: 3,
+  Gender: 'Male',
+  HourlyRate: 65,
+  JobInvolvement: 3,
+  JobLevel: 2,
+  JobRole: 'Research Scientist',
+  JobSatisfaction: 3,
+  MaritalStatus: 'Single',
+  MonthlyIncome: 5000,
+  MonthlyRate: 14000,
+  NumCompaniesWorked: 2,
+  OverTime: 'No',
+  PercentSalaryHike: 13,
+  PerformanceRating: 3,
+  RelationshipSatisfaction: 3,
+  StockOptionLevel: 1,
+  TotalWorkingYears: 10,
+  TrainingTimesLastYear: 3,
+  WorkLifeBalance: 3,
+  YearsAtCompany: 5,
+  YearsInCurrentRole: 3,
+  YearsSinceLastPromotion: 1,
+  YearsWithCurrManager: 3
+}
+
+const options: Record<string, OptionItem[]> = {
+  BusinessTravel: ['Travel_Rarely', 'Travel_Frequently', 'Non-Travel'],
+  Department: [
+    'Education',
+    'Private Job',
+    'Government Job',
+    'Healthcare',
+    'Banking & Finance',
+    'IT & Software',
+    'Engineering',
+    'Business / Entrepreneurship',
+    'Retail & Sales',
+    'Marketing & Advertising',
+    'Legal',
+    'Construction & Real Estate',
+    'Manufacturing',
+    'Media & Communication',
+    'Research & Development',
+    'Non-Profit / NGO',
+    'Freelancing / Self-Employed',
+    'Other'
+  ],
+  EducationField: ['Life Sciences', 'Medical', 'Marketing', 'Technical Degree', 'Other', 'Human Resources'],
+  Gender: ['Male', 'Female', 'Other'],
+  Education: [
+    { label: 'Below College', value: 1 },
+    { label: 'College', value: 2 },
+    { label: "Bachelor's Degree", value: 3 },
+    { label: "Master's Degree", value: 4 },
+    { label: 'Phd', value: 5 }
+  ],
+  JobRole: [
+    'Software Developer / Engineer',
+    'Data Analyst',
+    'Data Scientist',
+    'IT Support Specialist',
+    'Project Manager',
+    'Business Analyst',
+    'Sales Representative',
+    'Sales Manager',
+    'Marketing Specialist',
+    'HR / Recruiter',
+    'Financial Analyst / Accountant',
+    'Research Scientist',
+    'Healthcare Professional',
+    'Teacher / Lecturer',
+    'Administrative Officer',
+    'Operations Manager',
+    'Customer Service Representative',
+    'Consultant',
+    'Engineer',
+    'Other'
+  ],
+  JobLevel: [
+    { label: 'Entry Level — 0–2 years', value: 1 },
+    { label: 'Junior Level — 2–5 years', value: 2 },
+    { label: 'Mid Level — 5–8 years', value: 3 },
+    { label: 'Senior Level — 8–12 years', value: 4 },
+    { label: 'Lead / Managerial Level — 12+ years', value: 5 },
+    { label: 'Executive Level — Director / C-Suite', value: 5 }
+  ],
+  MaritalStatus: ['Single', 'Married', 'Divorced'],
+  OverTime: ['Yes', 'No']
+}
+
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
 async function health() { const response = await fetch(`${API_BASE}/`); if (!response.ok) throw new Error(`Health check failed (${response.status})`); return response.json() as Promise<{ model_ready: boolean }> }
@@ -82,21 +179,64 @@ const CustomSelectArrow = () => (
   </svg>
 )
 
-function Field({ label, name, value, update, min, max, choices, onFocus }: { label: string; name: string; value: string | number; update: (name: string, value: string | number) => void; min?: number; max?: number; choices?: string[]; onFocus?: () => void }) {
+function Field({
+  label,
+  name,
+  value,
+  update,
+  min,
+  max,
+  choices,
+  onFocus
+}: {
+  label: string
+  name: string
+  value: string | number
+  update: (name: string, value: string | number) => void
+  min?: number
+  max?: number
+  choices?: OptionItem[]
+  onFocus?: () => void
+}) {
   return (
     <label className="field">
       <span>{label}</span>
       {choices ? (
         <span className="select-wrap">
-          <select value={value} onChange={(event) => update(name, event.target.value)} onFocus={onFocus}>
-            {choices.map((choice) => (
-              <option key={choice} value={choice}>{choice.replace(/_/g, ' ')}</option>
-            ))}
+          <select
+            value={value}
+            onChange={(event) => {
+              const raw = event.target.value
+              const isNumeric = choices.some(
+                (c) => typeof c === 'object' && typeof c.value === 'number' && String(c.value) === raw
+              )
+              update(name, isNumeric ? Number(raw) : raw)
+            }}
+            onFocus={onFocus}
+          >
+            {choices.map((choice) => {
+              const optVal = typeof choice === 'object' ? choice.value : choice
+              const optLabel = typeof choice === 'object' ? choice.label : String(choice).replace(/_/g, ' ')
+              return (
+                <option key={String(optVal)} value={optVal}>
+                  {optLabel}
+                </option>
+              )
+            })}
           </select>
           <CustomSelectArrow />
         </span>
       ) : (
-        <input type="number" value={value} min={min} max={max} onChange={(event) => update(name, event.target.value === '' ? '' : Number(event.target.value))} onFocus={onFocus} />
+        <input
+          type="number"
+          value={value}
+          min={min}
+          max={max}
+          onChange={(event) =>
+            update(name, event.target.value === '' ? '' : Number(event.target.value))
+          }
+          onFocus={onFocus}
+        />
       )}
     </label>
   )
@@ -293,9 +433,9 @@ function App() {
 
         {/* Technical Signal Bar with nautical styling */}
         <section className="signal-bar">
-          <span><b>MODEL</b> {modelInfo?.model_name?.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase() || 'LOADING...'}</span>
-          <span><b>FEATURES</b> {modelInfo?.feature_count ?? '—'} ENGINEERED</span>
-          <span><b>THRESHOLD</b> {modelInfo?.threshold?.toFixed(2) ?? '—'}</span>
+          <span><b>MODEL</b> {modelInfo?.model_name?.replace(/([a-z])([A-Z])/g, '$1 $2').toUpperCase() || 'LOGISTIC REGRESSION'}</span>
+          <span><b>FEATURES</b> {modelInfo?.feature_count ?? '47'} ENGINEERED</span>
+          <span><b>THRESHOLD</b> {modelInfo?.threshold?.toFixed(2) ?? '0.35'}</span>
           <span className="signal-message">🧭 Log Pose is calibrated. Ready to sail.</span>
         </section>
 
@@ -333,11 +473,11 @@ function App() {
 
           <form onSubmit={submit}>
             <FieldGroup index="A" title="PERSONAL INFORMATION" copy="Basic identifiers and crew demographics" icon={SkullIcon} active={activeGroup === 'A'}>
-              <>{number('Age', 'Age', 18, 65, 'A')}{select('Gender', 'Gender', 'A')}{select('MaritalStatus', 'Marital Status', 'A')}{number('Education', 'Education Level', 1, 5, 'A')}</>
+              <>{number('Age', 'Age', 18, 65, 'A')}{select('Gender', 'Gender', 'A')}{select('MaritalStatus', 'Marital Status', 'A')}{select('Education', 'Education Level', 'A')}</>
             </FieldGroup>
 
             <FieldGroup index="B" title="PROFESSIONAL DETAILS" copy="Role assignments, rank and service tenure" icon={SwordsIcon} active={activeGroup === 'B'}>
-              <>{select('Department', 'Department', 'B')}{select('EducationField', 'Education Field', 'B')}{select('JobRole', 'Job Role', 'B')}{number('JobLevel', 'Job Level', 1, 5, 'B')}{number('MonthlyIncome', 'Monthly Income (Gold Coins)', 0, undefined, 'B')}{number('YearsAtCompany', 'Years on this Voyage', 0, undefined, 'B')}{number('YearsInCurrentRole', 'Years in Current Duty', 0, undefined, 'B')}{number('YearsSinceLastPromotion', 'Years Since Last Promotion', 0, undefined, 'B')}{number('YearsWithCurrManager', 'Years Under Current Captain', 0, undefined, 'B')}{number('TotalWorkingYears', 'Total Pirate Career Years', 0, undefined, 'B')}</>
+              <>{select('Department', 'Department', 'B')}{select('EducationField', 'Education Field', 'B')}{select('JobRole', 'Job Role', 'B')}{select('JobLevel', 'Job Level', 'B')}{number('MonthlyIncome', 'Monthly Income (Gold Coins)', 0, undefined, 'B')}{number('YearsAtCompany', 'Years on this Voyage', 0, undefined, 'B')}{number('YearsInCurrentRole', 'Years in Current Duty', 0, undefined, 'B')}{number('YearsSinceLastPromotion', 'Years Since Last Promotion', 0, undefined, 'B')}{number('YearsWithCurrManager', 'Years Under Current Captain', 0, undefined, 'B')}{number('TotalWorkingYears', 'Total Pirate Career Years', 0, undefined, 'B')}</>
             </FieldGroup>
 
             <FieldGroup index="C" title="WORK ENVIRONMENT" copy="Wellbeing, morale, and voyage stability" icon={AnchorIcon} active={activeGroup === 'C'}>
@@ -477,7 +617,7 @@ function App() {
             <article>
               <AnchorIcon />
               <small>DECISION THRESHOLD</small>
-              <strong>{modelInfo?.threshold?.toFixed(2) ?? '0.61'}</strong>
+              <strong>{modelInfo?.threshold?.toFixed(2) ?? '0.35'}</strong>
               <span>Validation Selected</span>
             </article>
             <article>
