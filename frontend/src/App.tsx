@@ -244,7 +244,13 @@ function Field({
 
 function FieldGroup({ index, title, copy, icon: Icon, active, children }: { index: string; title: string; copy: string; icon: React.ComponentType; active: boolean; children: React.ReactNode }) {
   return (
-    <motion.section className={`field-group ${active ? 'active-group' : ''}`} initial={{ opacity: 0, y: 22, filter: 'blur(6px)' }} whileInView={{ opacity: 1, y: 0, filter: 'blur(0px)' }} viewport={{ once: true, amount: .15 }} transition={{ duration: .55 }}>
+    <motion.section
+      className={`field-group ${active ? 'active-group' : ''}`}
+      initial={{ opacity: 0, y: 16 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.05 }}
+      transition={{ duration: 0.35 }}
+    >
       <div className="group-title">
         <span className="group-marker">{index}</span>
         <div className="group-icon-wrap">
@@ -311,18 +317,23 @@ function App() {
     fetchModelInfo().then((info) => { if (info) setModelInfo(info) }).catch(() => {})
     
     const onScroll = () => setScrolled(window.scrollY > 24)
+    const isTouch = typeof window !== 'undefined' && window.matchMedia('(pointer: coarse)').matches
     const onMouseMove = (e: MouseEvent) => {
       setMousePos({
-        x: (e.clientX / window.innerWidth - 0.5) * 20,
-        y: (e.clientY / window.innerHeight - 0.5) * 20
+        x: (e.clientX / window.innerWidth - 0.5) * 16,
+        y: (e.clientY / window.innerHeight - 0.5) * 16
       })
     }
 
-    window.addEventListener('scroll', onScroll)
-    window.addEventListener('mousemove', onMouseMove)
+    window.addEventListener('scroll', onScroll, { passive: true })
+    if (!isTouch) {
+      window.addEventListener('mousemove', onMouseMove, { passive: true })
+    }
     return () => {
       window.removeEventListener('scroll', onScroll)
-      window.removeEventListener('mousemove', onMouseMove)
+      if (!isTouch) {
+        window.removeEventListener('mousemove', onMouseMove)
+      }
     }
   }, [])
 
