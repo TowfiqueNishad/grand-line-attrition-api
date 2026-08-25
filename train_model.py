@@ -1217,4 +1217,25 @@ print("The test set was never resampled or used for tuning.")
 import joblib
 joblib.dump(final_fitted_model, "attrition-api/attrition_model.joblib")
 joblib.dump(final_threshold, "attrition-api/threshold.joblib")
-print("Exported final_fitted_model and final_threshold to attrition-api/")
+
+# Export metadata so the API can surface model name, strategy, and test metrics
+model_meta = {
+    "model_name": final_model_name,
+    "model_strategy": final_strategy,
+    "threshold": final_threshold,
+    "test_f1": round(final_test_metrics["F1"], 4),
+    "test_recall": round(final_test_metrics["Recall"], 4),
+    "test_precision": round(final_test_metrics["Precision"], 4),
+    "test_pr_auc": round(final_test_metrics["PR-AUC"], 4),
+    "test_roc_auc": round(final_test_metrics["ROC-AUC"], 4),
+    "test_balanced_accuracy": round(final_test_metrics["Balanced Accuracy"], 4),
+    "test_accuracy": round(final_test_metrics["Accuracy"], 4),
+}
+joblib.dump(model_meta, "attrition-api/model_meta.joblib")
+print(f"Exported final_fitted_model, final_threshold, and model_meta to attrition-api/")
+print(f"  Selected model : {final_model_name}")
+print(f"  Strategy       : {final_strategy}")
+print(f"  Threshold      : {final_threshold:.4f}")
+print(f"  Test F1        : {final_test_metrics['F1']:.4f}")
+print(f"  Test Recall    : {final_test_metrics['Recall']:.4f}")
+print(f"  Test PR-AUC    : {final_test_metrics['PR-AUC']:.4f}")

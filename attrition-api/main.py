@@ -1,4 +1,6 @@
 # main.py — FastAPI HR Attrition Prediction Service
+# Aligned with Group09_HR_attrition_FINAL_Submission_File.ipynb
+# 11-model imbalance-aware competition pipeline
 
 import os
 import joblib
@@ -18,11 +20,13 @@ from feature_engineering import add_hr_features
 app = FastAPI(
     title="HR Attrition Predictor",
     description=(
-        "Predicts employee attrition probability using a trained Logistic Regression pipeline. "
-        "Submit raw IBM HR dataset fields (pre-feature-engineering) and receive "
-        "a probability, binary prediction, and risk tier."
+        "Predicts employee attrition probability using a rigorous 11-model "
+        "imbalance-aware competition pipeline (notebook: Group09_HR_attrition_FINAL_Submission_File). "
+        "The final model is selected via nested outer-CV on Left F1 → PR-AUC → Balanced Accuracy → Recall → Precision. "
+        "Submit raw IBM HR dataset fields and receive a probability, binary prediction, risk tier, "
+        "and the selected model name."
     ),
-    version="1.0.0",
+    version="2.0.0",
 )
 
 # ---------------------------------------------------------------------------
@@ -58,13 +62,13 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
             missing_fields.append(str(field_name))
         else:
             invalid_fields.append(str(field_name))
-    
+
     msgs = []
     if missing_fields:
         msgs.append(f"Missing required fields: {', '.join(missing_fields)}")
     if invalid_fields:
         msgs.append(f"Invalid or empty values in fields: {', '.join(invalid_fields)}")
-        
+
     return JSONResponse(
         status_code=422,
         content={"detail": "Please review your input: " + ". ".join(msgs)}
@@ -73,27 +77,27 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 # ---------------------------------------------------------------------------
 # Lazy model loading — loaded on first request, not at import time.
-# This lets the server start even before the .joblib files exist.
+# Also loads optional metadata saved alongside the model.
 # ---------------------------------------------------------------------------
 _model = None
 _threshold: float | None = None
+_model_meta: dict = {}
 
 MODEL_PATH     = os.getenv("MODEL_PATH",     "attrition_model.joblib")
 THRESHOLD_PATH = os.getenv("THRESHOLD_PATH", "threshold.joblib")
+META_PATH      = os.getenv("META_PATH",      "model_meta.joblib")
 
 
 def get_model() -> tuple[Any, float]:
-    global _model, _threshold
+    global _model, _threshold, _model_meta
     if _model is None:
         if not os.path.exists(MODEL_PATH):
             raise HTTPException(
                 status_code=503,
                 detail=(
                     f"Model file not found: '{MODEL_PATH}'. "
-                    "Export it from your notebook first:\n"
-                    "  import joblib\n"
-                    "  joblib.dump(final_model, 'attrition_model.joblib')\n"
-                    "  joblib.dump(best_threshold, 'threshold.joblib')"
+                    "Re-run train_model.py to regenerate it:\n"
+                    "  python train_model.py"
                 ),
             )
         if not os.path.exists(THRESHOLD_PATH):
@@ -103,19 +107,16 @@ def get_model() -> tuple[Any, float]:
             )
         _model     = joblib.load(MODEL_PATH)
         _threshold = float(joblib.load(THRESHOLD_PATH))
+        # Load optional metadata (model name, strategy, test metrics)
+        if os.path.exists(META_PATH):
+            _model_meta = joblib.load(META_PATH)
     assert _threshold is not None
     return _model, _threshold
 
 
 # ---------------------------------------------------------------------------
-# Request schema
-# Fields mirror the standard IBM HR Attrition dataset minus constant / ID
-# columns that were dropped during training:
-#   EmployeeCount, EmployeeNumber, Over18, StandardHours
-#
-# ⚠️  Verify against your notebook:
-#       X_train.columns.tolist()   (run BEFORE add_hr_features is applied)
-#     and update this class if any column is missing or named differently.
+# Request schema — mirrors IBM HR dataset columns used in training
+# (constant/ID-like columns dropped: EmployeeCount, EmployeeNumber, Over18, StandardHours)
 # ---------------------------------------------------------------------------
 class Employee(BaseModel):
     model_config = {
@@ -197,6 +198,8 @@ class PredictionResponse(BaseModel):
     prediction: str          # "Yes" | "No"
     risk_level: str          # "High" | "Medium" | "Low"
     threshold_used: float
+    model_name: str | None = None    # e.g. "Random Forest", "XGBoost"
+    model_strategy: str | None = None  # e.g. "ClassWeight balanced"
 
 
 # ---------------------------------------------------------------------------
@@ -206,25 +209,34 @@ class PredictionResponse(BaseModel):
 def health_check():
     """Liveness probe — returns 200 OK when the service is ready."""
     model_ready = os.path.exists(MODEL_PATH) and os.path.exists(THRESHOLD_PATH)
+    meta = {}
+    if os.path.exists(META_PATH):
+        try:
+            meta = joblib.load(META_PATH)
+        except Exception:
+            pass
     return {
         "status": "ok",
         "model_ready": model_ready,
         "model_path": MODEL_PATH,
         "threshold_path": THRESHOLD_PATH,
+        "model_name": meta.get("model_name"),
+        "model_strategy": meta.get("model_strategy"),
+        "version": "2.0.0",
     }
 
 
 @app.get("/model-info", tags=["Health"])
 def model_info():
-    """Return metadata about the loaded model (name, feature count, threshold)."""
+    """Return metadata about the loaded model (name, strategy, feature count, threshold, test metrics)."""
     model, threshold = get_model()
 
     # Determine the model name from the pipeline's final estimator
     if hasattr(model, "steps"):
         final_step_name, final_estimator = model.steps[-1]
-        model_name = type(final_estimator).__name__
+        estimator_class = type(final_estimator).__name__
     else:
-        model_name = type(model).__name__
+        estimator_class = type(model).__name__
 
     # Build a sample to count engineered features
     _example: dict = {
@@ -245,11 +257,19 @@ def model_info():
     engineered = add_hr_features(sample)
     feature_count = engineered.shape[1]
 
-    return {
-        "model_name": model_name,
+    response = {
+        "estimator_class": estimator_class,
         "feature_count": feature_count,
         "threshold": round(threshold, 4),
     }
+
+    # Merge in saved metadata (model_name, strategy, test metrics) if available
+    response.update({
+        k: v for k, v in _model_meta.items()
+        if k not in response
+    })
+
+    return response
 
 
 @app.post("/predict", response_model=PredictionResponse, tags=["Prediction"])
@@ -259,7 +279,7 @@ def predict(employee: Employee):
 
     - Converts raw fields to a DataFrame.
     - Applies add_hr_features() — identical to training pipeline.
-    - Returns probability, binary label, and risk tier.
+    - Returns probability, binary label, risk tier, and winning model info.
     """
     model, threshold = get_model()
     try:
@@ -268,7 +288,8 @@ def predict(employee: Employee):
         probability = float(model.predict_proba(engineered_df)[0, 1])
         prediction = int(probability >= threshold)
 
-        if probability >= 0.6:
+        # Risk tiers: High = clearly above threshold and high absolute prob
+        if probability >= 0.65:
             risk_level = "High"
         elif probability >= threshold:
             risk_level = "Medium"
@@ -280,6 +301,8 @@ def predict(employee: Employee):
             prediction="Yes" if prediction == 1 else "No",
             risk_level=risk_level,
             threshold_used=round(threshold, 4),
+            model_name=_model_meta.get("model_name"),
+            model_strategy=_model_meta.get("model_strategy"),
         )
 
     except HTTPException:
@@ -293,6 +316,7 @@ def predict_batch(employees: list[Employee]):
     """
     Predict attrition for a list of employees in one call.
     Returns a list of prediction objects in the same order as the input.
+    Max batch size: 500.
     """
     if not employees:
         raise HTTPException(status_code=400, detail="Employee list must not be empty.")
@@ -309,7 +333,7 @@ def predict_batch(employees: list[Employee]):
         for prob in probabilities:
             prob = float(prob)
             pred = int(prob >= threshold)
-            if prob >= 0.6:
+            if prob >= 0.65:
                 risk = "High"
             elif prob >= threshold:
                 risk = "Medium"
@@ -321,6 +345,8 @@ def predict_batch(employees: list[Employee]):
                     "prediction": "Yes" if pred == 1 else "No",
                     "risk_level": risk,
                     "threshold_used": round(threshold, 4),
+                    "model_name": _model_meta.get("model_name"),
+                    "model_strategy": _model_meta.get("model_strategy"),
                 }
             )
         return results
