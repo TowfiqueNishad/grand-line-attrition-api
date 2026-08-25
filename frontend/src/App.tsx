@@ -281,7 +281,7 @@ function CountUp({ value }: { value: number }) {
     }, incrementTime)
     return () => clearInterval(timer)
   }, [value])
-  return <span>{count.toFixed(1)}</span>
+  return <span className="count-number">{count.toFixed(1)}</span>
 }
 
 function App() {
@@ -572,7 +572,7 @@ function App() {
                       <CountUp value={probability} />
                       <small>%</small>
                     </strong>
-                    <span>probability</span>
+                    <span className="gauge-label">probability</span>
                   </div>
                 </div>
 

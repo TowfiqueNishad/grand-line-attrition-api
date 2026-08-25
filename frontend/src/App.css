@@ -1205,10 +1205,20 @@ h1 em {
 
 .wanted-probability {
   font-family: var(--font-wanted);
-  font-size: 54px;
+  font-size: 60px;
   color: #1a0f05;
   margin: 6px 0;
   line-height: 1;
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+
+.wanted-probability .count-number {
+  font-family: var(--font-wanted);
+  font-size: 60px;
+  color: #1a0f05;
 }
 
 .wanted-attr-status {
@@ -1225,8 +1235,8 @@ h1 em {
 }
 
 .gauge-inner {
-  width: 220px;
-  height: 220px;
+  width: 240px;
+  height: 240px;
   border-radius: 50%;
   display: flex;
   align-items: center;
@@ -1251,27 +1261,45 @@ h1 em {
 }
 
 .gauge-inner strong,
-.gauge-inner span {
+.gauge-inner .gauge-label {
   position: relative;
   z-index: 2;
 }
 
 .gauge-inner strong {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
   font-family: var(--font-wanted);
-  font-size: 52px;
+  font-size: 69px;
   color: var(--ink);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.gauge-inner strong .count-number {
+  font-family: var(--font-wanted);
+  font-size: 69px;
+  color: var(--ink);
+  font-weight: 900;
+  letter-spacing: 0.5px;
 }
 
 .gauge-inner strong small {
-  font-size: 24px;
+  font-size: 28px;
+  font-family: var(--font-wanted);
+  color: var(--gold);
+  margin-left: 2px;
 }
 
-.gauge-inner span {
+.gauge-inner .gauge-label {
   color: var(--muted);
-  font-size: 10px;
+  font-size: 11px;
   font-family: var(--font-heading);
   font-weight: 800;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
 }
 
 .result-facts {
