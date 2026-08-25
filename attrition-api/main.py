@@ -248,7 +248,7 @@ def model_info():
     return {
         "model_name": model_name,
         "feature_count": feature_count,
-        "threshold": round(float(threshold), 4),
+        "threshold": round(threshold, 4),
     }
 
 
@@ -279,7 +279,7 @@ def predict(employee: Employee):
             attrition_probability=round(probability, 4),
             prediction="Yes" if prediction == 1 else "No",
             risk_level=risk_level,
-            threshold_used=round(float(threshold), 4),
+            threshold_used=round(threshold, 4),
         )
 
     except HTTPException:
@@ -320,7 +320,7 @@ def predict_batch(employees: list[Employee]):
                     "attrition_probability": round(prob, 4),
                     "prediction": "Yes" if pred == 1 else "No",
                     "risk_level": risk,
-                    "threshold_used": round(float(threshold), 4),
+                    "threshold_used": round(threshold, 4),
                 }
             )
         return results
